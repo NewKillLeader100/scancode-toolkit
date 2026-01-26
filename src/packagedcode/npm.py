@@ -116,7 +116,21 @@ class BaseNpmHandler(models.DatafileHandler):
 
         # We do not have any package data detected here
         if not package_resource.package_data:
-            return
+            # For workspaces, we should still try to handle the root package.json
+            # even if package_data is empty, as it might have dependencies
+            if workspaces:
+                # Attempt to parse the package.json directly
+                try:
+                    parsed_data = list(NpmPackageJsonHandler.parse(package_resource.location))
+                    if parsed_data:
+                        pkg_data = parsed_data[0]
+                        package_resource.package_data = [pkg_data.to_dict()]
+                    else:
+                        return  # Still no data, return early
+                except:
+                    return  # Parsing failed, return early
+            else:
+                return
 
         assert len(package_resource.package_data) == 1, f'Invalid package.json for {package_resource.path}'
         pkg_data = package_resource.package_data[0]
