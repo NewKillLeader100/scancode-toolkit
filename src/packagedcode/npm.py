@@ -197,8 +197,9 @@ class BaseNpmHandler(models.DatafileHandler):
                     codebase=codebase,
                     package_adder=package_adder,
                 )
+            else:
+                package_uid = None
 
-            package_uid = None
             if pnpm_workspace and pkg_data.purl:
                 package = models.Package.from_package_data(
                     package_data=pkg_data,
