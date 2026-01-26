@@ -177,6 +177,27 @@ class BaseNpmHandler(models.DatafileHandler):
                 pnpm=pnpm_workspace and pkg_data.purl,
             )
 
+            # Add logic to handle the root package.json's own dependencies
+            # when it defines workspaces.
+            if pkg_data.purl:
+                package = models.Package.from_package_data(
+                    package_data=pkg_data,
+                    datafile_path=package_resource.path,
+                )
+                package_uid = package.package_uid
+
+                package.populate_license_fields()
+                yield package
+
+                # Yield dependencies and resources for the root package
+                yield from cls.yield_npm_dependencies_and_resources(
+                    package_resource=package_resource,
+                    package_data=pkg_data,
+                    package_uid=package_uid,
+                    codebase=codebase,
+                    package_adder=package_adder,
+                )
+
             package_uid = None
             if pnpm_workspace and pkg_data.purl:
                 package = models.Package.from_package_data(
