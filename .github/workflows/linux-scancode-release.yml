@@ -1,4 +1,4 @@
-name: Create ScanCode release archives, then test and publish to GH and PyPI
+name: Create Linux ScanCode release archives, then test and publish to GH and PyPI
 
  # This is executed automatically on a tag
  #
