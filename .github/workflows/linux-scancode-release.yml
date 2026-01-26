@@ -253,36 +253,6 @@ jobs:
           name: linux_app_py_3.14
           path: dist
 
-      - name: Download a single artifact windows_app for python 3.10
-        uses: actions/download-artifact@v4
-        with:
-          name: windows_app_py_3.10
-          path: dist
-
-      - name: Download a single artifact windows_app for python 3.11
-        uses: actions/download-artifact@v4
-        with:
-          name: windows_app_py_3.11
-          path: dist
-
-      - name: Download a single artifact windows_app for python 3.12
-        uses: actions/download-artifact@v4
-        with:
-          name: windows_app_py_3.12
-          path: dist
-
-      - name: Download a single artifact windows_app for python 3.13
-        uses: actions/download-artifact@v4
-        with:
-          name: windows_app_py_3.13
-          path: dist
-
-      - name: Download a single artifact windows_app for python 3.14
-        uses: actions/download-artifact@v4
-        with:
-          name: windows_app_py_3.14
-          path: dist
-
       - name: Mock GH release
         run: |
           ls -al dist
