@@ -169,16 +169,20 @@ class BaseNpmHandler(models.DatafileHandler):
             yield package_resource
 
         elif workspaces:
+            # We treat the root as a package if it has a purl (name/version)
+            # This applies to both NPM and PNPM workspaces
+            has_root_package = bool(pkg_data.purl)
+
             yield from cls.create_packages_from_workspaces(
                 workspace_members=workspace_members,
                 workspace_root=workspace_root,
                 codebase=codebase,
                 package_adder=package_adder,
-                pnpm=pnpm_workspace and pkg_data.purl,
+                pnpm=has_root_package,
             )
 
             package_uid = None
-            if pnpm_workspace and pkg_data.purl:
+            if has_root_package:
                 package = models.Package.from_package_data(
                     package_data=pkg_data,
                     datafile_path=package_resource.path,
@@ -195,6 +199,15 @@ class BaseNpmHandler(models.DatafileHandler):
                         if package_uid and not npm_res.for_packages:
                             package_adder(package_uid, npm_res, codebase)
                         yield npm_res
+                
+                yield from cls.yield_npm_dependencies_and_resources(
+                    package_resource=package_resource,
+                    package_data=pkg_data,
+                    package_uid=package_uid,
+                    codebase=codebase,
+                    package_adder=package_adder,
+                )
+                
                 yield package_resource
 
         else:
@@ -248,6 +261,9 @@ class BaseNpmHandler(models.DatafileHandler):
                 package_data=pkg_data,
                 datafile_path=workspace_member.path,
             )
+            if not package:
+                continue
+
             package_uid = package.package_uid
             workspace_package_uids.append(package_uid)
 
@@ -1850,9 +1866,13 @@ def deps_mapper(deps, package, field_name, is_direct=True):
 
         if ':' in requirement and '@' in requirement:
             # dependencies with requirements like this are aliases and should be reported
-            aliased_package, _, requirement = requirement.rpartition('@')
+            aliased_package, _, requirement_candidate = requirement.rpartition('@')
             _, _, aliased_package_name = aliased_package.rpartition(':')
-            ns, _ , name = aliased_package_name.rpartition('/')
+            ns_candidate, _ , name_candidate = aliased_package_name.rpartition('/')
+            if name_candidate:
+                ns = ns_candidate
+                name = name_candidate
+                requirement = requirement_candidate
 
         purl = PackageURL(type='npm', namespace=ns, name=name).to_string()
 

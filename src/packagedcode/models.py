@@ -1668,6 +1668,9 @@ class Package(PackageData):
 
         package = cls.from_dict(package_data_mapping)
 
+        if not package:
+            return
+
         if not package.package_uid:
             package.package_uid = build_package_uid(package.purl)
 
