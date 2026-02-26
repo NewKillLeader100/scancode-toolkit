@@ -33,7 +33,7 @@ class BaseGoModuleHandler(models.DatafileHandler):
         Always use go.mod first then go.sum
         """
         yield from cls.assemble_from_many_datafiles(
-            datafile_name_patterns=('go.mod', 'go.sum',),
+            datafile_name_patterns=('go.mod',),
             directory=resource.parent(codebase),
             codebase=codebase,
             package_adder=package_adder,
@@ -105,7 +105,7 @@ class GoModHandler(BaseGoModuleHandler):
 
 class GoSumHandler(BaseGoModuleHandler):
     datasource_id = 'go_sum'
-    path_patterns = ('*/go.sum',)
+    path_patterns = ()
     default_package_type = 'golang'
     default_primary_language = 'Go'
     description = 'Go module cheksums file'
