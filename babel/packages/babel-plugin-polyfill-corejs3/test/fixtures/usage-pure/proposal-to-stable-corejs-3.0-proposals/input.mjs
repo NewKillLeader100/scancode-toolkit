@@ -1,2 +1,0 @@
-globalThis;
-foo.matchAll(bar);
