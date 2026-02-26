@@ -120,6 +120,8 @@ def parse_gomod(location):
     gomods = GoModule()
     require = []
     exclude = []
+    namespace = None
+    name = None
 
     for i, line in enumerate(lines):
         line = preprocess(line)
@@ -130,12 +132,12 @@ def parse_gomod(location):
                 if ')' in req:
                     break
                 parsed_dep_link = parse_dep_link(req)
-                ns_name = parsed_dep_link.group('ns_name')
-                namespace, _, name = ns_name.rpartition('/')
                 if parsed_dep_link:
+                    ns_name = parsed_dep_link.group('ns_name')
+                    dep_namespace, _, dep_name = ns_name.rpartition('/')
                     require.append(GoModule(
-                            namespace=namespace,
-                            name=name,
+                            namespace=dep_namespace,
+                            name=dep_name,
                             version=parsed_dep_link.group('version')
                         )
                     )
@@ -147,12 +149,12 @@ def parse_gomod(location):
                 if ')' in exc:
                     break
                 parsed_dep_link = parse_dep_link(exc)
-                ns_name = parsed_dep_link.group('ns_name')
-                namespace, _, name = ns_name.rpartition('/')
                 if parsed_dep_link:
+                    ns_name = parsed_dep_link.group('ns_name')
+                    dep_namespace, _, dep_name = ns_name.rpartition('/')
                     exclude.append(GoModule(
-                            namespace=namespace,
-                            name=name,
+                            namespace=dep_namespace,
+                            name=dep_name,
                             version=parsed_dep_link.group('version')
                         )
                     )
@@ -168,7 +170,7 @@ def parse_gomod(location):
             gomods.name = name
             continue
 
-        if 'require' in line:
+        if 'require' in line and parsed_module_name:
             require.append(GoModule(
                     namespace=namespace,
                     name=name,
@@ -177,7 +179,7 @@ def parse_gomod(location):
             )
             continue
 
-        if 'exclude' in line:
+        if 'exclude' in line and parsed_module_name:
             exclude.append(GoModule(
                     namespace=namespace,
                     name=name,
